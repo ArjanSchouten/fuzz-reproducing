@@ -1,0 +1,347 @@
+
+LINUX:   Linux Red Hat 6.2
+SOLARIS: Solaris 7 (x86)
+
+
+
+LINUX:   ptx
+FAILURE: crash
+FILE(S): t6, t12
+REASON:  pointer out of bounds
+CODE:
+
+  The function "define_all_fields()" is called with an "occur" 
+that has the following contexts:
+
+left_context_start = 0x806e33c <Address 0x806e33c out of bounds>
+right_context_end = 0x8069160 ""
+
+consequently, using the MACRO:
+
+ptx.c:1457      SKIP_WHITE_BACKWARDS (before.end, before.start);
+
+which is defined as:
+
+#define SKIP_WHITE_BACKWARDS(cursor, start)      \
+  while (cursor > start && ISSPACE(cursor[-1]))      \
+    cursor--
+
+causes define_all_field's cursor to become:
+
+cursor = 0x806e33c <Address 0x806e33c out of bounds> 
+
+Note these other MACRO definitions:
+
+#define ISSPACE(c) (IN_CTYPE_DOMAIN (c) && isspace (c)) 
+#define IN_CTYPE_DOMAIN(c) isascii(c) 
+
+  The reason lies in the function that parses input and
+determines its length. The find_occurs_in_text() function
+sets occurs_cursor->left which in turn is used in
+define_all_fields() to set the value of left_context_start
+which in turn sets the value of cursor in define_all_fields.
+
+  The solution lies in  one of the many while loops that 
+move "cursors" about in find_occurs_in_text. None of the loops 
+consider wrap-around properly. It is likely that the deeply 
+embedded MACROs blinds the coder to a situation where the pointer 
+would move beyond reasonable bounds of the input buffer.
+  We would also suggest that each MACRO require start,
+end, and cursor parameters.
+
+
+
+LINUX:   tcsh
+FAILURE: crash
+FILE(S): tp11, tp12
+REASON:  pointer out of bounds
+
+  tcsh contains code in the file sh.lex.c that
+does not error when the length of the input goes beyond
+a fixed sized array "name[121]" which "np" points to.
+
+From sh.lex.c:
+
+   while ((c = getC(0)) != (-1)) {    
+      *np++ = (Char) c;              
+      if(c == delim) delimcnt--;
+      if(!delimcnt) break;
+   }
+
+Hence, for long enough input with minimal delimiting
+"np" will be incremented beyond the fixed length
+of the array "name". 
+
+  The solution would be to print an error message
+related to requirements on the length of the input
+and exit if the "np" pointer went beyond the end
+of the name array.
+
+Replace with: 
+
+   while ((c = getC(0)) != (-1)) {    
+      if(np > &name[121]) {
+        fprintf(stderr, "tcsh: input string too long\n");
+      }
+      *np++ = (Char) c;              
+      if(c == delim) delimcnt--;
+      if(!delimcnt) break;
+   }
+
+
+
+LINUX:   emacs
+FAILURE: infinite loop
+FILE(S): t8, perhaps others
+REASON:  unknown
+
+  emacs gets caught in an infinite loop in the file
+xselect.c near line 1332. The reason lies in either
+the condition for breaking (property of length 0)
+the while( 1 ) never being met OR problems with 
+synchronization. The X server may have a bug where
+for some given input it will never return a property
+of length 0. It could also be that the code in 
+xselect.c does not handle synchronization by properly
+encasing all needed critical sections with BLOCK_INPUT
+and UNBLOCK_INPUT.
+
+  The solution lies in either getting X to return a
+value with a property of 0 or a difficult synchronization
+issue for blocking and unblocking. The MACROs are 
+suspicious in their semaphore-like attempts to gain
+synchronization when they likely would have problems
+were atomicity required. 
+
+
+
+SOLARIS:         adb
+FILE(S):         t2, t3
+Back Trace:      iclose()
+                 kopen()
+                 error()
+                 command()
+                 main()
+                 _start()
+
+
+
+SOLARIS:         adb
+FILE(S):         t6, t12
+Back Trace:      readchar()
+                 rdc()
+                 main()
+                 _start()
+
+
+adb dies when calling readchar
+
+One source file for adb does the following:
+
+        while (!isspace(lastc)) {
+            *p++=lastc;
+            (void) readchar();
+        }
+
+
+The fix:
+
+		while (!isspace(lastc)) {
+			if (p == &args[BUFSIZ - 1])
+				exit(-1);  /*  drastic STOP!  */
+			*p++ = lastc;
+ 		   ...
+		}
+
+
+NOTE:  this existed in the first paper - rdc() calls readchar() but no
+check is made on the return code from readchar().  Checking the return value could
+(in theory) prevent the buffer overrun.  In 11 years the problem still
+has not been fixed properly.
+
+
+SOLARIS:         col
+FILE(S):         t5, t6, t7, t8, t9, t11, t12
+Back Trace:      outc()
+                 main()
+                 _start()
+
+The segfault in "col" occurs due to out of bounds access of an array.
+Specifically, "col" extracts the input from stdin into a buffer called
+lbuff[4096]. "col" will then step through the buffer using a pointer
+called 'line', which is initialized to lbuff.
+
+However, "col" doesn't check the bounds of the array. After doing line++ 
+no checks is made to ensure that the new pointer is still within the bounds 
+of the array. 
+
+In the file col.c:
+
+...
+
+#define  LINELN 4096
+wchar_t  lbuff[LINELN], *line;
+
+...
+
+line = lbuff;
+
+...
+
+         while (*line == '\b') {      
+                 ...
+                 for (n = 0; *line == '\b'; line++) {
+                         n++;
+                         lp--;
+                 }
+                 while (n > 0 && lp < cp) {
+                         i = *line++;
+                         i = wcscrwidth(i);
+                         n -= i;
+                         lp += i;
+                 }
+         }
+...
+
+
+SOLARIS:         dc
+FILE(S):         t11, t12
+Back Trace:      command()
+                 ??()
+
+
+In dc.c:
+
+while ((c=readc()) != '\n')
+         *sl++ = c;
+
+"sl" points to a fixed size buffer.  
+
+
+The fix:
+
+char *sl = line;
+char *el = &line[99];
+...
+while ((c=readc()) != '\n') {
+         if (sl == el)
+                 exit(-1);
+         else
+                 *sl++ = c;
+}
+
+
+
+SOLARIS:         plot
+NOTES:           plot is a shell script that calls crtplot
+FILE(S):         t4
+Back Trace:      getstr()
+                 fplt()
+                 <signal handler called>
+                 ??()
+
+
+The crash is occurring in method getstr().
+
+getstr uses a fixed size buffer to read a string.  The check done only
+looks for a '\n' character on the line, not for too many characters.
+
+The same function, getstr, is written in each of five source files
+         atoplot.c, crtdriver.c, debug.c, driver.c, and plottoa.c
+
+Currently:
+
+getstr(s, fin) char *s; FILE *fin; {
+         for ( ; *s = getc(fin); s++)
+                 if (*s == '\n')
+                         break;
+         *s = '\0';
+}
+
+
+Fix:
+
+getstr(s, fin, len) char *s; FILE *fin; int len; {
+         if (len <= 0)
+                 return;
+
+         for ( ;; ) {
+                 *s = readc(fin);
+                 if (*s == '\n')
+                         break;
+                 if (s == &s[len - 1])
+                         exit(-1);
+
+                 s++
+         }
+}
+
+
+
+SOLARIS:         ul
+FILE(S):         t4, t5, t6, t10, t11, t12
+Back Trace:      getc_unlocked()
+                 __fgetwc_sb()
+                 _fgetwc_unlocked()
+                 fgetwc()
+                 filter()
+                 main()
+                 _start()
+
+ul is crashing in a system call
+
+main and filter are both defined in ul.c.  fgetwc is declared (extern) in
+/usr/include/wchar.h.  The methods with leading underscores are system
+calls. getwc_unlocked is declared as an extern method in stdio.h and then 
+defined as a macro in the same file.
+
+
+
+SOLARIS:         units
+NOTES:           units stripped too far to get anything useful
+FILE(S):         all except t10
+Back Trace:      ??()
+
+lines 145 and 146:
+
+         for (i=0; i<NDIM; i++)
+                 f |= pu(p->dim[i], i, f);
+
+print i from gdb gets:    2053849942
+
+NDIM is #define'd as 10
+p->dim is an array with NDIM elements.
+
+Unsure how "i" becomes that values.
+
+The read routine tries to put chars into a fixed 
+size array (20 chars) without checking bounds.
+
+
+
+SOLARIS:         dbx
+FILE(S):         t3
+Back Trace:      NONE    infinite loop
+
+No source code found.
+
+
+
+SOLARIS:         look
+FILE(S):         unknown
+Back Trace:      NONE    infinite loop
+
+The reason is Not Checking Return Code (NCRC).  
+readc() returns -1 when there are no more characters to be
+read.  look tries to find a newline ('\n') without bothering to see if
+there is a legitimate character available.
+
+Here is the fix:
+
+Method:  getword  [[ starts on line 157 of look.c ]]
+
+171c171
+<        while (c != '\n')
+---
+>        while (c != '\n' && c != -1)
+

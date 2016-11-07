@@ -1,0 +1,28 @@
+#! /bin/csh
+#  Copyright (c) 1989 Lars Fredriksen, Bryan So, Barton Miller
+#  All rights reserved
+#   
+#  This software is furnished under the condition that it may not
+#  be provided or otherwise made available to, or used by, any
+#  other person.  No title to or ownership of the software is
+#  hereby transferred.
+# 
+#  Any use of this software must include the above copyright notice.
+#  To detect whether a file is executable in the current path
+#
+set EXECUTABLE=0
+set PATHS=`printenv PATH | tr : " "`
+
+if ( -x $* && ! -d $* ) then
+     set EXECUTABLE=1
+     goto quit
+endif
+foreach p ($PATHS)
+     if ( -x $p/$* && ! -d $p/$*) then
+	  set EXECUTABLE=1
+	  goto quit
+     endif
+end
+
+quit:
+     if ( $EXECUTABLE ) echo 1

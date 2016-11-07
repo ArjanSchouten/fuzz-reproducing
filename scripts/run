@@ -1,0 +1,34 @@
+#! /bin/csh
+#  Copyright (c) 1989 Lars Fredriksen, Bryan So, Barton Miller
+#  All rights reserved
+#   
+#  This software is furnished under the condition that it may not
+#  be provided or otherwise made available to, or used by, any
+#  other person.  No title to or ownership of the software is
+#  hereby transferred.
+# 
+#  Any use of this software must include the above copyright notice.
+
+#  Fuzz tests.
+#
+set MASTER=run.master
+set DATE=`date | cut -d " " -f -3 | sed -e "s/ /_/g"`
+set NOTES=notes-$DATE
+set total=`wc $MASTER`
+set total=$total[1]               # total no. of utilities
+set n=1                           # current utility
+
+echo ''
+echo Starting fuzz test...
+echo ''
+
+while ( $n <= $total )
+     onintr TestNext
+     set cmd = `sed -n ${n}p $MASTER`  # Get the nth command from the master 
+     `pwd`/$cmd       		       # file and execute it
+TestNext:
+     set n=`expr $n + 1`               # Increase the line counter
+end
+
+echo ''
+echo Fuzz tests are done.  Results are stored in $NOTES

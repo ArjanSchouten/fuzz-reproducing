@@ -1,0 +1,86 @@
+run.stdin adb
+run.stdin as
+run.stdin bc
+run.stdin bib
+run.stdin cat
+run.stdin cb
+run.stdin /lib/ccom
+run.stdin checkeq
+run.stdin checknr
+run.stdin col
+run.stdin colcrt
+run.stdin colrm
+run.stdin /lib/cpp
+run.stdin dbx
+run.stdin dc
+run.stdin deqn
+run.stdin deroff
+run.stdin diction
+run.stdin ../../src/linux/groff-1.11a/groff/groff -t
+run.stdin dtbl
+run.stdin ../../src/linux/groff-1.11a/eqn/eqn
+run.stdin expand
+run.stdin fmt
+run.stdin fold
+run.stdin ftp
+run.stdin graph
+run.stdin grep a
+run.stdin grn
+run.stdin head
+run.stdin ideal
+run.stdin indent -st
+run.stdin latex
+run.stdin lex
+run.stdin m4
+run.stdin more
+run.stdin ../../src/linux/groff-1.11a/nroff/nroff
+run.stdin pic
+run.stdin plot
+run.stdin pr
+run.stdin prolog
+run.stdin psdit
+run.stdin ptx
+run.stdin ../../src/linux/groff-1.11a/refer/refer
+run.stdin rev
+run.stdin sed s/a/b/g
+run.stdin sh
+run.stdin soelim
+run.stdin sort
+run.stdin spell
+run.stdin spline
+run.stdin sql
+run.stdin strings
+run.stdin style
+run.stdin sum
+run.stdin tail
+run.stdin tbl
+run.stdin tee /tmp/tee.tmp
+run.stdin telnet
+run.stdin tex
+run.stdin tr a b
+run.stdin troff -t
+run.stdin tsort
+run.stdin ul
+run.stdin uniq
+run.stdin units
+run.stdin vgrind -t
+run.stdin wc
+run.file awk -f
+run.file comm t12
+run.file diff t12
+run.file join t12
+run.file look a
+run.file make -f
+run.file nm
+run.file strip
+run.file yacc
+run.cp - calendar calendar
+run.cp t.c cc
+run.cp t compress -f
+run.cp t.f f77
+run.cp t.c lint
+run.cp t.p pc
+run.cp t split -10
+run.pty csh
+run.pty emacs -nw
+run.pty ~/public/vim-5.6/src/vim -Z

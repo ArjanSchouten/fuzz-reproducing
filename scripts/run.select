@@ -1,0 +1,39 @@
+#! /bin/csh
+#  Copyright (c) 1989 Lars Fredriksen, Bryan So, Barton Miller
+#  All rights reserved
+#   
+#  This software is furnished under the condition that it may not
+#  be provided or otherwise made available to, or used by, any
+#  other person.  No title to or ownership of the software is
+#  hereby transferred.
+# 
+#  Any use of this software must include the above copyright notice.
+
+#  Fuzz tests.
+#
+#  Make all the utilites to be tested the arguments to this script
+#
+set MASTER=run.master
+set DATE=`date | cut -d " " -f -3 | sed -e "s/ /_/g"`
+set NOTES=notes-$DATE
+set total=`wc $MASTER`
+
+echo ''
+echo Starting fuzz test...
+echo ''
+
+foreach program ($*)
+     onintr TestNext
+     set cmd = `grep $program $MASTER` # Get the nth command from the master 
+     if ($status) then
+	  echo $program not present in $MASTER
+	  echo $program not present in $MASTER >> $NOTES
+     else
+          $cmd       		       
+     endif
+TestNext:
+     : # do the next test
+end
+
+echo ''
+echo Fuzz tests are done.  Results are stored in $NOTES

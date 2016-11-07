@@ -1,0 +1,41 @@
+#! /bin/csh
+#  Copyright (c) 1989 Lars Fredriksen, Bryan So, Barton Miller
+#  All rights reserved
+#   
+#  This software is furnished under the condition that it may not
+#  be provided or otherwise made available to, or used by, any
+#  other person.  No title to or ownership of the software is
+#  hereby transferred.
+# 
+#  Any use of this software must include the above copyright notice.
+
+#  Make fuzz inputs
+
+   echo Making random streams, please wait...
+   echo t1; fuzz -0 -a -s 10 1000  >! t1
+   echo t2; fuzz -0 -a -s 10 10000 >! t2
+   echo t3; fuzz -0 -a -s 10 100000 >! t3
+   echo t4; fuzz -0 -p -s 10 1000 >! t4
+   echo t5; fuzz -0 -p -s 10 10000 >! t5
+   echo t6; fuzz -0 -p -s 10 100000 >! t6
+   echo t7; fuzz -a -s 10 1000 >! t7
+   echo t8; fuzz -a -s 10 10000 >! t8
+   echo t9; fuzz -a -s 10 100000 >! t9
+   echo t10; fuzz -p -s 10 1000 >! t10
+   echo t11; fuzz -p -s 10 10000 >! t11
+   echo t12; fuzz -p -s 10 100000 >! t12
+#
+#  Now for the PTY test cases
+#
+   echo tp1; fuzz -0 -a -l -x -s 10 10  >! tp1 
+   echo tp2; fuzz -0 -a -l -x -s 10 100 >! tp2 
+   echo tp3; fuzz -0 -a -l -x -s 10 1000 >! tp3 
+   echo tp4; fuzz -0 -p -l -x -s 10 10 >! tp4 
+   echo tp5; fuzz -0 -p -l -x -s 10 100 >! tp5 
+   echo tp6; fuzz -0 -p -l -x -s 10 1000 >! tp6 
+   echo tp7; fuzz -a -l -x  -s 10 10 >! tp7 
+   echo tp8; fuzz -a -l -x -s 10 100 >! tp8 
+   echo tp9; fuzz -a -l -x -s 10 1000 >! tp9 
+   echo tp10; fuzz -p -l -x -s 10 10 >! tp10 
+   echo tp11; fuzz -p -l -x -s 10 100 >! tp11 
+   echo tp12; fuzz -p -l -x -s 10 1000 >! tp12 

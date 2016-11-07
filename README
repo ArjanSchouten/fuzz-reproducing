@@ -1,0 +1,44 @@
+-----------------------------------------------------------------
+Copyright (c) 1989 Lars Fredriksen, Bryan So, Barton Miller
+Copyright (c) 1994, 1995 Lars Fredriksen, Bryan So, Barton Miller
+All rights reserved
+    
+This program is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+-----------------------------------------------------------------
+
+Please note that this is a second alpha release of the fuzz software.
+It is not yet in a fully packaged form.  All the software should run
+with little effort on Sun Solaris, GNU/Linux, and 4.3BSD variants of UNIX.
+Please see the source code for ptyjig.c for specific system configurations.
+
+If you make changes to the software in which others may be interested,
+please send them back to us.  Our eventual goal is to produce a version
+with makefiles and ifdef's to configure for many systems.
+
+Feel free to send us commments, suggestions, complaints, and questions.  We'll
+do what we can to help.
+
+							Bart Miller
+							bart@cs.wisc.edu
+
+Directories
+-----------
+Scripts contains the a set of shell scripts that uses pre-defined test
+files (the ones we used in our initial paper).
+Doc contains manual pages for them.
+
+
+Running the Tests
+-----------------
+To run the test, you must
+
+1. Configure the source programs (edit ptyjig.c for your system).
+2. Compile the software (make).
+3. Make sure the commands are installed in one of your paths.
+4. The "run" command in either of the script directories will execute
+   the tests.  You should feel free to make a new script directory to
+   customize the scripts for your own system.
+
+Note: run.master contains the programs names to test
